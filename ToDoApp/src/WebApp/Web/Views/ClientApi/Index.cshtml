@@ -1,0 +1,29 @@
+﻿@model Web.ViewModels.Helpers.BaseMessageResponseViewModel
+@{
+    ViewData["Title"] = "Client Api";
+}
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        New Record
+    </a>
+</p>
+
+<table class="table table-bordered table-hover" id="datatablesId"></table>
+<script>
+    $(document).ready(function () {
+        var statusMessage = '@Model.Message';
+        var statusCode = '@Model.StatusCode';
+
+        var contollerName = "ClientApi";
+        var url = '/ClientApi/LoadDatatables/';
+        var actions = ["Edit", "Delete", "Details"];
+        var columns = [
+            { 'name': 'Name', 'type': 'string' },
+            { 'name': 'ClientId', 'type': 'string' },
+            { 'name': 'ClientSecret', 'type': 'string' },
+            { 'name': 'DateModified', 'type': 'datetime' },
+            { 'name': 'IsActive', 'type': 'boolean' }
+        ];
+        loadDatatables("datatablesId", contollerName, url, columns, actions);
+    });
+</script>
