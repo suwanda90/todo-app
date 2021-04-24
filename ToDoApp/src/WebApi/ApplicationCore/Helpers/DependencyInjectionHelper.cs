@@ -1,7 +1,5 @@
 ﻿using ApplicationCore.Interfaces;
-using ApplicationCore.Interfaces.Auth;
 using ApplicationCore.Interfaces.Config;
-using ApplicationCore.Services.Auth;
 using ApplicationCore.Services.Config;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,8 +18,6 @@ namespace ApplicationCore.Helpers
             services.AddTransient<IGroupTaskService, GroupTaskService>();
 
             services.AddTransient<ITasksService, TasksService>();
-
-            services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
 
             return services;
         }

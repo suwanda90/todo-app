@@ -88,7 +88,7 @@ namespace Infrastructure.Data
                     ((IAuditableEntity)entity.Entity).DateModified = DateTime.Now.ToLocalTime();
                     ((IAuditableEntity)entity.Entity).ModifiedBy = _httpContextAccessor.HttpContext?.User?.FindFirst("Username")?.Value.ToBase64Decode();
                 }
-                else if (entity.State == EntityState.Modified)
+                else
                 {
                     foreach (var prop in entity.Properties)
                     {

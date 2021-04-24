@@ -23,8 +23,7 @@ namespace Infrastructure.Data
 
         public async Task<IReadOnlyList<TEntity>> GetAllAsync()
         {
-            var source = GetAll();
-            return await source.ToListAsync();
+            return await GetAll().ToListAsync();
         }
 
         public async Task<IReadOnlyList<TEntity>> GetAllAsync(ISpecificationQuery<TEntity> spec)
@@ -88,7 +87,8 @@ namespace Infrastructure.Data
 
         public async Task<DatatablesPagedResults<TEntity>> GetByPagingAsync(IReadOnlyList<TEntity> source, int start, int length)
         {
-            var data = source.AsQueryable();
+            var data = source.AsQueryable()
+                             .AsNoTracking();
 
             var size = await data
                 .CountAsync();
@@ -121,21 +121,19 @@ namespace Infrastructure.Data
 
         public async Task<TEntity> GetAsync(TId id)
         {
-            var source = GetAll();
-            return await source.FirstOrDefaultAsync(x => x.Id.Equals(id));
+            return await GetAll().FirstOrDefaultAsync(x => x.Id.Equals(id));
         }
 
         public async Task<TEntity> GetAsync(ISpecificationQuery<TEntity> spec, TId id)
         {
-            return await GetAll(spec)
-                .FirstOrDefaultAsync(x => x.Id.Equals(id));
+            return await GetAll(spec).FirstOrDefaultAsync(x => x.Id.Equals(id));
         }
 
-        public async Task<int> CountAllAsync()
+        public async Task<int> CountAsync()
         {
             return await _dbContext.Set<TEntity>()
-                .AsNoTracking()
-                .CountAsync();
+                                   .AsNoTracking()
+                                   .CountAsync();
         }
 
         public async Task<int> CountAsync(ISpecificationQuery<TEntity> spec)
@@ -168,7 +166,9 @@ namespace Infrastructure.Data
 
         public async Task<bool> IsExistDataAsync(IDictionary<string, object> whereData)
         {
-            var dbSet = _dbContext.Set<TEntity>().AsNoTracking();
+            var dbSet = _dbContext.Set<TEntity>()
+                                  .AsQueryable()
+                                  .AsNoTracking();
 
             IQueryable<TEntity> exp;
 
@@ -208,7 +208,9 @@ namespace Infrastructure.Data
 
         public async Task<bool> IsExistDataWithKeyAsync(ExistWithKeyModel model)
         {
-            var dbSet = _dbContext.Set<TEntity>().AsNoTracking();
+            var dbSet = _dbContext.Set<TEntity>()
+                                   .AsQueryable()
+                                   .AsNoTracking();
 
             IQueryable<TEntity> oldData;
 
@@ -322,31 +324,17 @@ namespace Infrastructure.Data
 
         public IQueryable<TEntity> GetAll()
         {
-            var source = _dbContext.Set<TEntity>().AsNoTracking();
+            var data = _dbContext.Set<TEntity>()
+                                 .AsQueryable()
+                                 .AsNoTracking();
 
-            foreach (var item in EntityIncludes())
-            {
-                source = source.Include(item);
-            }
-
-            return source;
+            return data;
         }
 
         public IQueryable<TEntity> GetAll(ISpecificationQuery<TEntity> spec)
         {
             var source = GetAll();
             return BaseSpecificationQuery<TEntity>.GetQuery(source, spec);
-        }
-
-        protected List<string> EntityIncludes()
-        {
-            var includes = new List<string>();
-            foreach (var property in _dbContext.Model.FindEntityType(typeof(TEntity)).GetNavigations())
-            {
-                includes.Add(property.Name);
-            }
-
-            return includes;
         }
     }
 }

@@ -24,7 +24,7 @@ namespace ApplicationCore.Interfaces.BaseEntity
 
         Task<TEntity> GetAsync(TId id);
 
-        Task<int> CountAllAsync();
+        Task<int> CountAsync();
 
         Task<int> CountAsync(ISpecificationQuery<TEntity> spec);
 

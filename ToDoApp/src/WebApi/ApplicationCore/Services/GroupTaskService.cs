@@ -6,6 +6,7 @@ using ApplicationCore.Helpers.Select2.Model;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Interfaces.BaseEntity;
 using ApplicationCore.Specifications;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
