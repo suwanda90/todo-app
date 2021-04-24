@@ -1,11 +1,11 @@
-﻿using ApplicationCore.Entities.Config;
+﻿using ApplicationCore.Entities;
 using ApplicationCore.Helpers.BaseEntity.Model;
 using ApplicationCore.Helpers.Datatables.Model;
 using ApplicationCore.Helpers.Select2;
 using ApplicationCore.Helpers.Select2.Model;
+using ApplicationCore.Interfaces;
 using ApplicationCore.Interfaces.BaseEntity;
-using ApplicationCore.Interfaces.Config;
-using ApplicationCore.Specifications.Config;
+using ApplicationCore.Specifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,48 +13,50 @@ using System.Threading.Tasks;
 
 namespace ApplicationCore.Services.Config
 {
-    public class ClientApiService : IClientApiService
+    public class GroupTaskService : IGroupTaskService
     {
-        private readonly IEfRepository<ClientApi, Guid> _repository;
+        private readonly IEfRepository<GroupTask, Guid> _repository;
+        private readonly ITasksService _tasksService;
 
-        public ClientApiService(IEfRepository<ClientApi, Guid> repository)
+        public GroupTaskService(IEfRepository<GroupTask, Guid> repository, ITasksService tasksService)
         {
             _repository = repository;
+            _tasksService = tasksService;
         }
 
-        public async Task<DatatablesPagedResults<ClientApi>> DatatablesAsync(DatatablesParameter param)
+        public async Task<DatatablesPagedResults<GroupTask>> DatatablesAsync(DatatablesParameter param)
         {
-            var spec = new ClientApiSpecification();
+            var spec = new GroupTaskSpecification();
             return await _repository.DatatablesAsync(param, spec);
         }
 
-        public async Task<DatatablesPagedResults<ClientApi>> GetAsync(DataParameter param)
+        public async Task<DatatablesPagedResults<GroupTask>> GetAsync(DataParameter param)
         {
-            var spec = new ClientApiSpecification();
+            var spec = new GroupTaskSpecification();
             var source = await _repository.GetAllAsync(spec);
 
             return await _repository.GetByPagingAsync(source, param.Start, param.Length);
         }
 
-        public async Task<IReadOnlyList<ClientApi>> GetAllAsync()
+        public async Task<IReadOnlyList<GroupTask>> GetAllAsync()
         {
-            var spec = new ClientApiSpecification();
+            var spec = new GroupTaskSpecification();
             return await _repository.GetAllAsync(spec);
         }
 
-        public async Task<ClientApi> GetAsync(Guid id)
+        public async Task<GroupTask> GetAsync(Guid id)
         {
-            var spec = new ClientApiSpecification();
+            var spec = new GroupTaskSpecification();
             return await _repository.GetAsync(spec, id);
         }
 
-        public async Task<Guid?> PostAsync(ClientApi model)
+        public async Task<Guid?> PostAsync(GroupTask model)
         {
             Guid? id = null;
 
             var where = new Dictionary<string, object>
             {
-                { nameof(model.ClientId), model.ClientId}
+                { nameof(model.Name), model.Name}
             };
 
             if (!await _repository.IsExistDataAsync(where))
@@ -66,21 +68,21 @@ namespace ApplicationCore.Services.Config
             return id;
         }
 
-        public async Task<Guid?> PutAsync(ClientApi model)
+        public async Task<Guid?> PutAsync(GroupTask model)
         {
             Guid? id = null;
 
             var where = new Dictionary<string, object>
             {
-                { nameof(model.ClientId), model.ClientId}
+                { nameof(model.Name), model.Name}
             };
 
             var param = new ExistWithKeyModel
             {
                 KeyName = nameof(model.Id),
                 KeyValue = model.Id,
-                FieldName = nameof(model.ClientId),
-                FieldValue = model.ClientId,
+                FieldName = nameof(model.Name),
+                FieldValue = model.Name,
                 WhereData = where
             };
 
@@ -95,6 +97,12 @@ namespace ApplicationCore.Services.Config
 
         public async Task DeleteAsync(Guid id)
         {
+            var tasks = await _tasksService.GetAllAsync(id);
+            foreach (var task in tasks)
+            {
+                await _tasksService.DeleteAsync(task.Id);
+            }
+
             var data = await _repository.GetAsync(id);
             await _repository.DeleteAsync(data);
         }
@@ -111,7 +119,7 @@ namespace ApplicationCore.Services.Config
 
         public async Task<IReadOnlyList<Select2Binding>> BindingSelect2Async()
         {
-            var spec = new ClientApiSpecification(true);
+            var spec = new GroupTaskSpecification(true);
             var source = await _repository.GetAllAsync(spec);
 
             var result = source.Where(x => x.IsActive == true)
@@ -126,7 +134,7 @@ namespace ApplicationCore.Services.Config
 
         public async Task<Select2Result> BindingSelect2Async(Guid id)
         {
-            var spec = new ClientApiSpecification(true);
+            var spec = new GroupTaskSpecification(true);
             var data = await _repository.GetAsync(id);
             var text = string.Empty;
 

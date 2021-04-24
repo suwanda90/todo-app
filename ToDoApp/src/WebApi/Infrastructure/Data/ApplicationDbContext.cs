@@ -24,6 +24,9 @@ namespace Infrastructure.Data
         //Config
         public DbSet<ClientApi> ClientApi { get; private set; }
 
+        public DbSet<GroupTask> GroupTask { get; private set; }
+        public DbSet<Tasks> Tasks { get; private set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

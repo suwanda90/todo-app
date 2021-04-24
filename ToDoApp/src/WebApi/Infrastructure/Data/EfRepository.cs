@@ -226,7 +226,7 @@ namespace Infrastructure.Data
 
             bool result;
 
-            if (oldValue != model.FieldValue)
+            if (oldValue != (dynamic)model.FieldValue)
             {
                 IQueryable<TEntity> exp;
 
@@ -295,6 +295,17 @@ namespace Infrastructure.Data
                         }
 
                         i++;
+                    }
+
+                    whereCriteria += " and ";
+
+                    if (model.KeyValue.GetType() == typeof(string) || model.KeyValue.GetType() == typeof(Guid))
+                    {
+                        whereCriteria += model.KeyName + "<> \"" + model.KeyValue + "\"";
+                    }
+                    else
+                    {
+                        whereCriteria += model.KeyName + " <> " + model.KeyValue;
                     }
 
                     exp = dbSet.Where(whereCriteria);

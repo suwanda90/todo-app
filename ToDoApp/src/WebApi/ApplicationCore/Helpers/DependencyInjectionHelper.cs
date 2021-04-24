@@ -1,4 +1,5 @@
-﻿using ApplicationCore.Interfaces.Auth;
+﻿using ApplicationCore.Interfaces;
+using ApplicationCore.Interfaces.Auth;
 using ApplicationCore.Interfaces.Config;
 using ApplicationCore.Services.Auth;
 using ApplicationCore.Services.Config;
@@ -15,6 +16,10 @@ namespace ApplicationCore.Helpers
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             //config
             services.AddTransient<IClientApiService, ClientApiService>();
+
+            services.AddTransient<IGroupTaskService, GroupTaskService>();
+
+            services.AddTransient<ITasksService, TasksService>();
 
             services.AddScoped<IAuthenticatedUserService, AuthenticatedUserService>();
 

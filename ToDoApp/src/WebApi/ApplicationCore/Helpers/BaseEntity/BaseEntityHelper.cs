@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ApplicationCore.Helpers.BaseEntity.Model;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,7 +99,7 @@ namespace ApplicationCore.Helpers.BaseEntity
             return result;
         }
 
-        public static async Task<bool> IsExistDataWithKeyAsync<TEntity>(this IQueryable<TEntity> source, string keyName, object keyValue, string fieldName, object fieldValue, IDictionary<string, object> where)
+        public static async Task<bool> IsExistDataWithKeyAsync<TEntity>(this IQueryable<TEntity> source, ExistWithKeyModel model)
         {
             var result = false;
 
@@ -106,26 +107,26 @@ namespace ApplicationCore.Helpers.BaseEntity
             {
                 IQueryable<TEntity> oldData;
 
-                if (keyValue.GetType() == typeof(string) || keyValue.GetType() == typeof(Guid))
+                if (model.KeyValue.GetType() == typeof(string) || model.KeyValue.GetType() == typeof(Guid))
                 {
-                    oldData = source.Where(keyName + "=\"" + keyValue + "\"");
+                    oldData = source.Where(model.KeyName + "=\"" + model.KeyValue + "\"");
                 }
                 else
                 {
-                    oldData = source.Where(keyName + "=" + keyValue);
+                    oldData = source.Where(model.KeyName + "=" + model.KeyValue);
                 }
 
-                var resultOldData = oldData.Select(fieldName).ToDynamicList();
+                var resultOldData = oldData.Select(model.FieldName).ToDynamicList();
                 var oldValue = resultOldData[0];
 
-                if (oldValue != (dynamic)fieldValue)
+                if (oldValue != (dynamic)model.FieldValue)
                 {
                     IQueryable<TEntity> exp;
 
                     var whereCriteria = string.Empty;
 
                     int i = 1;
-                    foreach (var item in where)
+                    foreach (var item in model.WhereData)
                     {
                         if (item.Value.GetType() == typeof(string) || item.Value.GetType() == typeof(Guid))
                         {
@@ -143,7 +144,7 @@ namespace ApplicationCore.Helpers.BaseEntity
                             whereCriteria += item.Key + "=" + item.Value;
                         }
 
-                        if (i < where.Count)
+                        if (i < model.WhereData.Count)
                         {
                             whereCriteria += " and ";
                         }
@@ -156,14 +157,14 @@ namespace ApplicationCore.Helpers.BaseEntity
                 }
                 else
                 {
-                    if (where.Count > 1)
+                    if (model.WhereData.Count > 1)
                     {
                         IQueryable<TEntity> exp;
 
                         var whereCriteria = string.Empty;
 
                         int i = 1;
-                        foreach (var item in where)
+                        foreach (var item in model.WhereData)
                         {
                             if (item.Value.GetType() == typeof(string) || item.Value.GetType() == typeof(Guid))
                             {
@@ -181,7 +182,7 @@ namespace ApplicationCore.Helpers.BaseEntity
                                 whereCriteria += item.Key + "=" + item.Value;
                             }
 
-                            if (i < where.Count)
+                            if (i < model.WhereData.Count)
                             {
                                 whereCriteria += " and ";
                             }
@@ -191,13 +192,13 @@ namespace ApplicationCore.Helpers.BaseEntity
 
                         whereCriteria += " and ";
 
-                        if (keyValue.GetType() == typeof(string) || keyValue.GetType() == typeof(Guid))
+                        if (model.KeyValue.GetType() == typeof(string) || model.KeyValue.GetType() == typeof(Guid))
                         {
-                            whereCriteria += keyName + "<> \"" + keyValue + "\"";
+                            whereCriteria += model.KeyName + "<> \"" + model.KeyValue + "\"";
                         }
                         else
                         {
-                            whereCriteria += keyName + " <> " + keyValue;
+                            whereCriteria += model.KeyName + " <> " + model.KeyValue;
                         }
 
                         exp = source.Where(whereCriteria);
